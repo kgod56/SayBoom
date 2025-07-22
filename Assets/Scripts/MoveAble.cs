@@ -48,7 +48,7 @@ public class MoveAble : MonoBehaviour
         if (other.transform.tag == "Player" && !isTigger)
         {
             //TODO 获取玩家大小类型  
-            int type = other.transform.GetComponent<AudioControlledPlayer>().Size;
+            int type = other.transform.GetComponent<PlayerController>().Size;
 
             if (type == 2)
             {

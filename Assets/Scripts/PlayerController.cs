@@ -17,7 +17,7 @@ public class PlayerController : MonoBehaviourPun
 
     [Header("跳跃设置")]
     public float jumpForce = 12f;
-    public float jumpForcePlayer = 24f;//玩家踩在别的玩家身上时跳跃的高度
+    public float jumpForcePlayer = 300f;//玩家踩在别的玩家身上时跳跃的高度
     public float gravity = 25f;
     public float maxFallSpeed = 20f;
     public float jumpBufferTime = 0.2f;  // 跳跃缓冲时间
@@ -44,8 +44,9 @@ public class PlayerController : MonoBehaviourPun
     public float jumpBufferTimer;
     public float coyoteTimer;
     private bool jumpPressed;
-
-
+    
+    public int Size;//玩家大小
+    
     [Header("脚部检测：用于防止多次跳跃")]
     public Transform _virtual_foot;
     public Transform _virtual_head;
@@ -116,6 +117,10 @@ public class PlayerController : MonoBehaviourPun
         {
             jumpPressed = true;
             jumpBufferTimer = jumpBufferTime;
+        }
+        if (Input.GetKeyDown(KeyCode.E))
+        {
+            ForceJump();
         }
     }
 
@@ -270,9 +275,13 @@ public class PlayerController : MonoBehaviourPun
         jumpForce = force;
     }
     [PunRPC]
-    public void RemoteJump()
+    public void RemoteJump()//远程控制跳跃方法
     {
-        ForceJump();
+        if (Size<2)
+        {
+            ForceJump();
+        }
+        
     }
     /// <summary>
     /// 获取是否在地面
@@ -289,7 +298,7 @@ public class PlayerController : MonoBehaviourPun
     {
         if (isGrounded || coyoteTimer > 0)
         {
-            rb.velocity = new Vector2(rb.velocity.x, jumpForce);
+            rb.velocity = new Vector2(rb.velocity.x, jumpForcePlayer);
         }
     }
 

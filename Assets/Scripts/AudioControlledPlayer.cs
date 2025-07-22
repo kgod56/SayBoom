@@ -30,7 +30,8 @@ public class AudioControlledPlayer : MonoBehaviour
     [Header("物理特性")]
     public float gravity;
 
-    public int Size;
+   
+    private bool becomeBig;//是否正在变大
     void Awake()
     {
         if (autoSetupComponents)
@@ -55,33 +56,41 @@ public class AudioControlledPlayer : MonoBehaviour
     }
 
     private void OnPlayerSizeChanged(int arg0)
-    {
-        Size = arg0;
+    {   
+        playerController.Size = arg0;
+       
+            
     }
      
-     void LetOtherJump()
+    private Dictionary<GameObject, float> jumpCooldowns = new Dictionary<GameObject, float>();
+    
+    void LetOtherJump(GameObject target)
     {
         if (NetworkManager.Instance == null)
         {
             Debug.LogError("NetworkManager.Instance 为空，请确保场景中有 NetworkManager！");
             return;
         }
-        List<GameObject> others = NetworkManager.Instance.GetOtherPlayers();
-        foreach (GameObject other in others)
+        PhotonView pv = target.GetComponent<PhotonView>();
+        if (pv != null)
         {
-            PhotonView pv = other.GetComponent<PhotonView>();
-            if (pv != null)
-            {
-                // 让对方玩家执行ApplyForce，参数为你想要的力
-                pv.RPC("ApplyForce", pv.Owner, new Vector2(0, 10f));
-            }
+            pv.RPC("RemoteJump", pv.Owner);
         }
     }
     private void CheckForceJump(int arg0)
     {
-        // 检测头顶是否有玩家（假设玩家在Layer 8）
-        //Collider2D hit = Physics2D.OverlapCircle(playerController._virtual_head.position, 0.5f, 1 << 8);
-        LetOtherJump();
+        if (playerController == null || playerController._virtual_head == null) return;
+        Collider2D[] hits = Physics2D.OverlapCircleAll(playerController._virtual_head.position, 0.5f, 1 << 8);
+        float now = Time.time;
+        foreach (var hit in hits)
+        {
+            if (hit.gameObject == this.gameObject) continue;
+            if (!jumpCooldowns.ContainsKey(hit.gameObject) || now - jumpCooldowns[hit.gameObject] > 0.5f)
+            {
+                LetOtherJump(hit.gameObject);
+                jumpCooldowns[hit.gameObject] = now;
+            }
+        }
     }
     void OnDestroy()
     {
