@@ -17,6 +17,7 @@ public class PlayerController : MonoBehaviourPun
 
     [Header("跳跃设置")]
     public float jumpForce = 12f;
+    public float jumpForcePlayer = 24f;//玩家踩在别的玩家身上时跳跃的高度
     public float gravity = 25f;
     public float maxFallSpeed = 20f;
     public float jumpBufferTime = 0.2f;  // 跳跃缓冲时间
@@ -47,6 +48,7 @@ public class PlayerController : MonoBehaviourPun
 
     [Header("脚部检测：用于防止多次跳跃")]
     public Transform _virtual_foot;
+    public Transform _virtual_head;
     [SerializeField] private bool isJumping;
 
 
@@ -76,6 +78,7 @@ public class PlayerController : MonoBehaviourPun
 
     private void Start() {
         _virtual_foot = transform.Find("Virtual foot");
+        _virtual_head = transform.Find("Virtual head");
         _collider = transform.GetComponent<BoxCollider2D>();
     }
 
@@ -93,7 +96,7 @@ public class PlayerController : MonoBehaviourPun
 
     void FixedUpdate()
     {
-        if (!photonView.IsMine) return;
+        if (!photonView.IsMine && PhotonNetwork.IsConnected) return;
         HandleMovement();
         HandleJump();
         ApplyGravity();
@@ -266,7 +269,11 @@ public class PlayerController : MonoBehaviourPun
     {
         jumpForce = force;
     }
-
+    [PunRPC]
+    public void RemoteJump()
+    {
+        ForceJump();
+    }
     /// <summary>
     /// 获取是否在地面
     /// </summary>
@@ -337,7 +344,7 @@ public class PlayerController : MonoBehaviourPun
     {
         if (isJumping)
         {
-            Collider2D ground =Physics2D.OverlapCircle(_virtual_foot.transform.position, 0.1f, (1 << 6 )| (1 << 7));
+            Collider2D ground =Physics2D.OverlapCircle(_virtual_foot.transform.position, 0.1f, (1 << 6 )| (1 << 7)|(1<<8));
             if (ground)
             {
                 isJumping = false;

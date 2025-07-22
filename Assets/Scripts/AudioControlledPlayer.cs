@@ -1,5 +1,9 @@
 using System;
 using UnityEngine;
+using System.Collections.Generic;
+using Photon.Pun;
+using Photon.Realtime;
+
 
 /// <summary>
 /// 音频控制玩家 - 整合了操作控制和音频控制模块
@@ -47,16 +51,43 @@ public class AudioControlledPlayer : MonoBehaviour
 
 
         EventCenter.GetInstance().AddEventListener<int>("PlayerSizeChanged", OnPlayerSizeChanged);
+        EventCenter.GetInstance().AddEventListener<int>("PlayerSizeChanged", CheckForceJump);
     }
 
     private void OnPlayerSizeChanged(int arg0)
     {
         Size = arg0;
     }
+     
+     void LetOtherJump()
+    {
+        if (NetworkManager.Instance == null)
+        {
+            Debug.LogError("NetworkManager.Instance 为空，请确保场景中有 NetworkManager！");
+            return;
+        }
+        List<GameObject> others = NetworkManager.Instance.GetOtherPlayers();
+        foreach (GameObject other in others)
+        {
+            PhotonView pv = other.GetComponent<PhotonView>();
+            if (pv != null)
+            {
+                // 让对方玩家执行ApplyForce，参数为你想要的力
+                pv.RPC("ApplyForce", pv.Owner, new Vector2(0, 10f));
+            }
+        }
+    }
+    private void CheckForceJump(int arg0)
+    {
+        // 检测头顶是否有玩家（假设玩家在Layer 8）
+        //Collider2D hit = Physics2D.OverlapCircle(playerController._virtual_head.position, 0.5f, 1 << 8);
+        LetOtherJump();
+    }
     void OnDestroy()
     {
         // 取消订阅，防止内存泄漏
         EventCenter.GetInstance().RemoveEventListener<int>("PlayerSizeChanged", OnPlayerSizeChanged);
+        EventCenter.GetInstance().RemoveEventListener<int>("PlayerSizeChanged", CheckForceJump);
     }
 
     /// <summary>
