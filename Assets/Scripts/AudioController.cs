@@ -7,7 +7,7 @@ public class AudioController : MonoBehaviour
 {
     [Header("音频设置")]
     public AudioSource audioSource;
-    public float scaleSensitivity = 20000f;  // 修改默认值为200
+    public float scaleSensitivity = 200f;  // 修改默认值为200
     public float minScale = 0.5f;
     public float maxScale = 3f;
     public float scaleSmoothing = 5f;

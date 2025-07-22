@@ -30,8 +30,7 @@ public class AudioControlledPlayer : MonoBehaviour
     [Header("物理特性")]
     public float gravity;
 
-   
-    private bool becomeBig;//是否正在变大
+    public int Size;
     void Awake()
     {
         if (autoSetupComponents)
@@ -56,10 +55,8 @@ public class AudioControlledPlayer : MonoBehaviour
     }
 
     private void OnPlayerSizeChanged(int arg0)
-    {   
-        playerController.Size = arg0;
-       
-            
+    {
+        Size = arg0;
     }
      
     private Dictionary<GameObject, float> jumpCooldowns = new Dictionary<GameObject, float>();
@@ -74,21 +71,36 @@ public class AudioControlledPlayer : MonoBehaviour
         PhotonView pv = target.GetComponent<PhotonView>();
         if (pv != null)
         {
+            Debug.Log($"发送RPC给 {target.name}，ViewID={pv.ViewID}");
             pv.RPC("RemoteJump", pv.Owner);
+        }
+        else
+        {
+            Debug.LogWarning($"目标 {target.name} 没有PhotonView组件");
         }
     }
     private void CheckForceJump(int arg0)
     {
-        if (playerController == null || playerController._virtual_head == null) return;
+        if (playerController == null || playerController._virtual_head == null) {
+            Debug.LogWarning("playerController或_virtual_head为空，无法检测头顶玩家");
+            return;
+        }
         Collider2D[] hits = Physics2D.OverlapCircleAll(playerController._virtual_head.position, 0.5f, 1 << 8);
         float now = Time.time;
+        Debug.Log($"检测头顶玩家数量: {hits.Length}");
         foreach (var hit in hits)
         {
             if (hit.gameObject == this.gameObject) continue;
+            Debug.Log($"检测到头顶玩家: {hit.gameObject.name}");
             if (!jumpCooldowns.ContainsKey(hit.gameObject) || now - jumpCooldowns[hit.gameObject] > 0.5f)
             {
+                Debug.Log($"尝试让玩家 {hit.gameObject.name} 跳跃");
                 LetOtherJump(hit.gameObject);
                 jumpCooldowns[hit.gameObject] = now;
+            }
+            else
+            {
+                Debug.Log($"玩家 {hit.gameObject.name} 跳跃冷却中，剩余: {0.5f - (now - jumpCooldowns[hit.gameObject])} 秒");
             }
         }
     }
