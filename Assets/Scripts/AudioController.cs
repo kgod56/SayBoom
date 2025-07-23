@@ -7,7 +7,7 @@ public class AudioController : MonoBehaviour
 {
     [Header("音频设置")]
     public AudioSource audioSource;
-    public float scaleSensitivity = 200f;  // 修改默认值为200
+    public float scaleSensitivity = 2000f;  // 修改默认值为200
     public float minScale = 0.5f;
     public float maxScale = 3f;
     public float scaleSmoothing = 5f;
@@ -100,7 +100,7 @@ public class AudioController : MonoBehaviour
                 sizeState = 1;
 
             // 状态变化时通过事件中心发送事件
-            if (sizeState != lastSizeState)
+            if (sizeState ==0&&lastSizeState==2)
             {
                 EventCenter.GetInstance().EventTrigger<int>("PlayerSizeChanged", sizeState);
                 lastSizeState = sizeState;

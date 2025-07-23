@@ -9,7 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6178980959573027121}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Virtual foot
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -47,7 +47,7 @@ GameObject:
   - component: {fileID: 1197592197957538946}
   - component: {fileID: 3313773436775546818}
   - component: {fileID: 5819805239450954073}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Player
   m_TagString: Player
   m_Icon: {fileID: 0}
@@ -283,7 +283,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4465331127310110603}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Virtual head
   m_TagString: Untagged
   m_Icon: {fileID: 0}

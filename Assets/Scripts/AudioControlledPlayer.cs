@@ -87,10 +87,11 @@ public class AudioControlledPlayer : MonoBehaviour
         }
         Collider2D[] hits = Physics2D.OverlapCircleAll(playerController._virtual_head.position, 0.5f, 1 << 8);
         float now = Time.time;
-        Debug.Log($"检测头顶玩家数量: {hits.Length}");
         foreach (var hit in hits)
         {
-            if (hit.gameObject == this.gameObject) continue;
+            PhotonView pv = hit.GetComponent<PhotonView>();
+            if (pv != null && pv.IsMine) continue; // 排除自己
+            Debug.Log($"检测头顶玩家数量: {hits.Length}");
             Debug.Log($"检测到头顶玩家: {hit.gameObject.name}");
             if (!jumpCooldowns.ContainsKey(hit.gameObject) || now - jumpCooldowns[hit.gameObject] > 0.5f)
             {
